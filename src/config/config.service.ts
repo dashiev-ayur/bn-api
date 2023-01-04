@@ -31,6 +31,13 @@ class ConfigService {
     return mode === 'PROD';
   }
 
+  public getJwtSecret() {
+    return this.getValue('JWT_SECRET', true);
+  }
+  public getJwtTokenExpires() {
+    return this.getValue('JWT_TOKEN_EXPIRES', false) || '60s';
+  }
+
   public getTypeOrmConfig(): TypeOrmModuleOptions {
     return {
       type: 'postgres',
@@ -39,8 +46,10 @@ class ConfigService {
       username: this.getValue('POSTGRES_USER'),
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DB'),
-      entities: ['entity/*.entity.ts'],
+      entities: ['entities/*.entity.ts', 'entities/*.entity.js'],
       synchronize: true,
+      autoLoadEntities: true,
+      logging: true,
       // migrationsTableName: 'migration',
       // migrations: ['src/migration/*.ts'],
       ssl: this.isProduction(),
@@ -54,6 +63,8 @@ const configService = new ConfigService(process.env).ensureValues([
   'POSTGRES_USER',
   'POSTGRES_PASSWORD',
   'POSTGRES_DB',
+  'JWT_SECRET',
+  'JWT_TOKEN_EXPIRES',
 ]);
 
 export { configService };
