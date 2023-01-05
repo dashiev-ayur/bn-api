@@ -21,6 +21,9 @@ export class User {
   @Column()
   public password: string;
 
+  @Column({ nullable: true })
+  public refreshToken: string;
+
   @Column({ name: 'is_active', default: true })
   public isActive: boolean;
 

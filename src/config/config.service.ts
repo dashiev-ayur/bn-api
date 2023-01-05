@@ -34,8 +34,17 @@ class ConfigService {
   public getJwtSecret() {
     return this.getValue('JWT_SECRET', true);
   }
+
+  public getJwtRefreshSecret() {
+    return this.getValue('JWT_REFRESH_SECRET', true);
+  }
+
   public getJwtTokenExpires() {
     return this.getValue('JWT_TOKEN_EXPIRES', false) || '60s';
+  }
+
+  public getJwtRefreshTokenExpires() {
+    return this.getValue('JWT_REFRESH_TOKEN_EXPIRES', false) || '1d';
   }
 
   public getTypeOrmConfig(): TypeOrmModuleOptions {
@@ -64,7 +73,9 @@ const configService = new ConfigService(process.env).ensureValues([
   'POSTGRES_PASSWORD',
   'POSTGRES_DB',
   'JWT_SECRET',
+  'JWT_REFRESH_SECRET',
   'JWT_TOKEN_EXPIRES',
+  'JWT_REFRESH_TOKEN_EXPIRES',
 ]);
 
 export { configService };

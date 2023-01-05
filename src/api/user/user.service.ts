@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
@@ -32,6 +32,19 @@ export class UserService {
       const result = await this.repUser.save(user);
       this.eventEmitter.emit('user.created', result);
       return result;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  async saveRefreshToken(login: string, refreshToken: string) {
+    try {
+      const user = await this.repUser.findOneBy({ login });
+      if (!user) {
+        throw new UnauthorizedException('Пользователь не найден !');
+      }
+      user.refreshToken = refreshToken;
+      return await this.repUser.save(user);
     } catch (err) {
       throw err;
     }

@@ -24,7 +24,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ),
       );
     }
-    const { password, ...rest } = user;
-    return done(null, rest, payload.iat);
+    const { password, refreshToken, ...rest } = user;
+    const result = { ...rest, payload };
+    return done(null, result, payload.iat);
   }
 }
