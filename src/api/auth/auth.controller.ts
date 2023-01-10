@@ -1,10 +1,13 @@
 import { Controller, Request, Post, UseGuards, Get } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { HasRoles } from './decorators/has-roles.decorator';
+import { acl, AppRoles } from '../../app.roles';
 
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { JwtRefreshGuard } from './jwt-refresh.guard';
-import { LocalAuthGuard } from './local-auth.guard';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
+import { JwtRefreshGuard } from './guard/jwt-refresh.guard';
+import { LocalAuthGuard } from './guard/local-auth.guard';
+import { Auth } from './decorators/auth.decorator';
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -46,5 +49,24 @@ export class AuthController {
   @ApiOperation({ summary: 'Тест c авторизацией' })
   secretInfo(@Request() req) {
     return req.user;
+  }
+
+  @Get('secret2')
+  @HasRoles(AppRoles.USER, AppRoles.ADMIN)
+  @Auth()
+  secretInfo2(@Request() req) {
+    const permission = acl.can('admin').readOwn('news');
+    const data = {
+      id: 1,
+      views: 125,
+      title: 'Заголовок 1',
+    };
+
+    return {
+      ...req.user,
+      granted: permission.granted,
+      attributes: permission.attributes,
+      data: permission.filter(data),
+    };
   }
 }

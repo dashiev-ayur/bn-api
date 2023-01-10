@@ -15,6 +15,9 @@ export class User {
   @Column({ nullable: true })
   public name: string;
 
+  @Column({ nullable: true, default: 'user' })
+  public role: string;
+
   @Column({ unique: true })
   public login: string;
 
