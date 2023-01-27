@@ -1,20 +1,10 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Inject,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../auth/guard/jwt-auth.guard';
-import { CreateUserDto } from './user.dto';
+import { ActivateDto, CreateUserDto } from './user.dto';
 import { UserService } from './user.service';
 
 @ApiTags('Пользователи')
 @Controller('user')
-@UseGuards(JwtAuthGuard)
 export class UserController {
   @Inject()
   private readonly userService: UserService;
@@ -23,6 +13,13 @@ export class UserController {
   @ApiOperation({ summary: 'Получение всех пользователей' })
   getAll() {
     return this.userService.getAll();
+  }
+
+  @Post('activate')
+  @ApiOperation({ summary: 'Активация - деактивация' })
+  activate(@Body() body: ActivateDto) {
+    console.log('>>>>>>>', body);
+    return this.userService.activate(body.activate);
   }
 
   @Post()

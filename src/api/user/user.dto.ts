@@ -1,16 +1,41 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+} from 'class-validator';
+import { AppRoles } from 'src/app.roles';
 
-export class CreateUserDto {
-  @IsString()
+export class ActivateDto {
+  @IsBoolean()
   @ApiProperty()
-  name: string;
-
+  activate: boolean;
+}
+export class CreateUserDto {
+  @IsNotEmpty()
   @IsString()
   @ApiProperty()
   login: string;
 
+  @IsNotEmpty()
   @IsString()
   @ApiProperty()
+  @IsStrongPassword()
   password: string;
+
+  @IsNotEmpty()
+  @IsEnum(AppRoles)
+  @ApiProperty({
+    description: 'Роль пользователя',
+    enum: AppRoles,
+  })
+  role: AppRoles;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty()
+  name: string;
 }

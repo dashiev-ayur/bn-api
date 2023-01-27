@@ -7,7 +7,7 @@ import { configService } from './config/config.service';
 import { UserModule } from './api/user/user.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { AuthModule } from './api/auth/auth.module';
-
+import { BullModule } from '@nestjs/bull';
 @Module({
   imports: [
     TypeOrmModule.forRoot(configService.getTypeOrmConfig()),
@@ -20,11 +20,27 @@ import { AuthModule } from './api/auth/auth.module';
       verboseMemoryLeak: false,
       ignoreErrors: false,
     }),
+    BullModule.forRoot({
+      redis: {
+        host: 'localhost',
+        port: 6379,
+        password: 'eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81',
+      },
+    }),
     UserModule,
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: 'Keys',
+      useValue: {
+        key1: '567sdfs4t3tgdfgd',
+        key2: '3245drfgfdh45',
+      },
+    },
+  ],
 })
 export class AppModule {
   constructor(private dataSource: DataSource) {

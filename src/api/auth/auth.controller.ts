@@ -4,7 +4,6 @@ import { HasRoles } from './decorators/has-roles.decorator';
 import { acl, AppRoles } from '../../app.roles';
 
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { JwtRefreshGuard } from './guard/jwt-refresh.guard';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { Auth } from './decorators/auth.decorator';
@@ -20,21 +19,24 @@ export class AuthController {
   @UseGuards(LocalAuthGuard) // Проверка логина пароля
   @ApiOperation({ summary: 'Аутентификация' })
   login(@Request() req): Promise<any> {
-    return this.authService.login(req.user); // Генерирование токенов
+    const payload = req.user; // local strategy
+    return this.authService.login(payload); // Генерирование токенов
   }
 
   @Post('refresh')
   @ApiOperation({ summary: 'Обновление токенов' })
   @UseGuards(JwtRefreshGuard) // Проверка токена refresh
   refresh(@Request() req): Promise<any> {
-    return this.authService.refreshToken(req.user); // Генерирование токенов
+    const payload = req.user; // refresh strategy
+    return this.authService.refreshToken(payload); // Генерирование токенов
   }
 
   @Post('logout')
   @ApiOperation({ summary: 'Обнуление refresh токена' })
   @UseGuards(JwtRefreshGuard)
   logout(@Request() req): Promise<any> {
-    return this.authService.logout(req.user);
+    const payload = req.user; // refresh strategy
+    return this.authService.logout(payload);
   }
 
   @Get()
@@ -44,7 +46,7 @@ export class AuthController {
   }
 
   @Get('secret')
-  @UseGuards(JwtAuthGuard)
+  @Auth()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Тест c авторизацией' })
   secretInfo(@Request() req) {
@@ -52,7 +54,7 @@ export class AuthController {
   }
 
   @Get('secret2')
-  @HasRoles(AppRoles.USER, AppRoles.ADMIN)
+  @HasRoles(AppRoles.ADMIN, AppRoles.CLIENT, AppRoles.USER)
   @Auth()
   secretInfo2(@Request() req) {
     const permission = acl.can('admin').readOwn('news');

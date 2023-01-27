@@ -1,4 +1,15 @@
 import {
+  IsBoolean,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { AppRoles } from 'src/app.roles';
+import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
@@ -12,21 +23,35 @@ export class User {
   @PrimaryGeneratedColumn()
   public id: number;
 
+  @IsString()
+  @IsNotEmpty()
   @Column({ nullable: true })
   public name: string;
 
+  @IsString()
+  @IsEnum(AppRoles)
   @Column({ nullable: true, default: 'user' })
-  public role: string;
+  public role: AppRoles;
 
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(5)
+  @MaxLength(15)
   @Column({ unique: true })
   public login: string;
 
+  @IsString()
+  @IsNotEmpty()
   @Column()
   public password: string;
 
+  @IsString()
+  @IsOptional()
   @Column({ nullable: true })
   public refreshToken: string;
 
+  @IsBoolean()
+  @IsOptional()
   @Column({ name: 'is_active', default: true })
   public isActive: boolean;
 

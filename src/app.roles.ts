@@ -1,9 +1,9 @@
 import { AccessControl } from 'accesscontrol';
 
 export enum AppRoles {
-  USER = 'user',
-  TESTER = 'tester',
-  ADMIN = 'admin',
+  USER = 'USER',
+  CLIENT = 'CLIENT',
+  ADMIN = 'ADMIN',
 }
 
 const acl = new AccessControl({

@@ -1,18 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotAcceptableException,
-} from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
-import { User } from 'src/entities/user.entity';
 import { configService } from 'src/config/config.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-interface Payload {
+export interface Payload {
   login: string;
   id: number;
 }
@@ -29,7 +23,10 @@ export class AuthService {
   async validateUser(login: string, password: string): Promise<any> {
     const user = await this.userService.findOne(login);
     if (!user) {
-      throw new NotAcceptableException('Пользователь не найден !');
+      throw new ForbiddenException('Пользователь не найден !');
+    }
+    if (!user.isActive) {
+      throw new ForbiddenException('Пользователь не активен !');
     }
     const passwordValid = await bcrypt.compare(password, user.password);
     if (passwordValid) {
@@ -38,11 +35,11 @@ export class AuthService {
     return null;
   }
 
-  async login(user: User) {
-    if (!user) {
-      throw new NotAcceptableException('Пользователь не определен ! !');
+  async login(user: Payload) {
+    if (!user.id || !user.login) {
+      throw new ForbiddenException('Пользователь не определен ! !');
     }
-    const payload: Payload = { login: user.login, id: user.id };
+    const payload: Payload = { login: user.login, id: user.id }; // save to jwt
     const secret1 = configService.getJwtSecret();
     const expires1 = configService.getJwtTokenExpires();
     const secret2 = configService.getJwtRefreshSecret();
@@ -63,42 +60,29 @@ export class AuthService {
     return {
       access_token,
       refresh_token,
+      user,
     };
   }
 
-  async checkPayload(payload) {
-    const { login, refresh_token } = payload;
-
-    const user = await this.userFromPayload(payload);
-    if (!user || !user.isActive) {
-      throw new ForbiddenException('Not found active user !');
-    }
-
-    if (!user || !user.refreshToken)
-      throw new ForbiddenException('Access Denied !');
-
-    const tokenValid = refresh_token === user.refreshToken;
-    if (!tokenValid) throw new ForbiddenException('Access Denied');
-
-    return user;
-  }
-
-  async refreshToken(payload) {
-    await this.checkPayload(payload);
+  async refreshToken(payload: Payload) {
+    const { login } = payload;
+    const user = await this.userFromLogin(login);
     const tokens = await this.login(payload);
-    await this.eventEmitter.emit('user.refresh', payload);
-    return tokens;
+    await this.eventEmitter.emit('user.refresh', user);
+    return {
+      ...tokens,
+      user,
+    };
   }
 
-  async logout(payload) {
-    const user = await this.checkPayload(payload);
-    await this.userService.saveRefreshToken(user.login, null);
+  async logout(payload: Payload) {
+    const { login } = payload;
+    await this.userService.saveRefreshToken(login, null);
     await this.eventEmitter.emit('user.logout', payload);
     return true;
   }
 
-  async userFromPayload(payload: Payload) {
-    const { login } = payload;
+  async userFromLogin(login: string) {
     return await this.userService.findOne(login);
   }
 }
