@@ -15,7 +15,7 @@ async function bootstrap() {
   app.enableCors({
     origin: function (origin, callback) {
       const whitelist = [
-        'http://localhost:3000',
+        'http://localhost:3001',
         'http://buryatia.name',
         'https://buryatia.name',
       ];
