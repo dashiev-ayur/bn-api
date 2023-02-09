@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy, VerifiedCallback } from 'passport-jwt';
 import { configService } from '../../../config/config.service';
@@ -17,20 +17,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: Payload, done: VerifiedCallback) {
     const user = await this.authService.userFromLogin(payload.login);
     if (!user) {
-      return done(
-        new HttpException(
-          'From token: user not found !',
-          HttpStatus.UNAUTHORIZED,
-        ),
-      );
+      return done(new UnauthorizedException('From token: user not found !'));
     }
     if (!user.isActive) {
-      return done(
-        new HttpException(
-          'From token: user not active !',
-          HttpStatus.UNAUTHORIZED,
-        ),
-      );
+      return done(new UnauthorizedException('From token: user not active !'));
     }
     const { password, refreshToken, ...rest } = user;
     return done(null, rest);

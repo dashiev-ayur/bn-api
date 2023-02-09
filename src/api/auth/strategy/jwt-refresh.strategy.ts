@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { configService } from 'src/config/config.service';
@@ -24,13 +24,13 @@ export class JwtRefreshStrategy extends PassportStrategy(
     const refresh_token = req.get('Authorization').replace('Bearer', '').trim();
 
     if (!user) {
-      throw new ForbiddenException('Refresh token: not found user !');
+      throw new UnauthorizedException('Refresh token: not found user !');
     }
     if (!user.isActive) {
-      throw new ForbiddenException('Refresh token: user is not active !');
+      throw new UnauthorizedException('Refresh token: user is not active !');
     }
     if (user.refreshToken !== refresh_token) {
-      throw new ForbiddenException('Refresh token: incorrect token !');
+      throw new UnauthorizedException('Refresh token: incorrect token !');
     }
     // return { ...payload, refresh_token };
     const { password, refreshToken, ...rest } = user;

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
@@ -23,10 +23,10 @@ export class AuthService {
   async validateUser(login: string, password: string): Promise<any> {
     const user = await this.userService.findOne(login);
     if (!user) {
-      throw new ForbiddenException('Пользователь не найден !');
+      throw new UnauthorizedException('Пользователь не найден !');
     }
     if (!user.isActive) {
-      throw new ForbiddenException('Пользователь не активен !');
+      throw new UnauthorizedException('Пользователь не активен !');
     }
     const passwordValid = await bcrypt.compare(password, user.password);
     if (passwordValid) {
@@ -37,7 +37,7 @@ export class AuthService {
 
   async login(user: Payload) {
     if (!user.id || !user.login) {
-      throw new ForbiddenException('Пользователь не определен ! !');
+      throw new UnauthorizedException('Пользователь не определен ! !');
     }
     const payload: Payload = { login: user.login, id: user.id }; // save to jwt
     const secret1 = configService.getJwtSecret();

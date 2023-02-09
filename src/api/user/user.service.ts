@@ -25,15 +25,6 @@ export class UserService {
 
   async create(body: CreateUserDto) {
     try {
-      // const errors1 = await validate(body);
-      // errors1.map((err: ValidationError) => {
-      //   console.log('error field>', err.toString());
-      // });
-      // if (errors1.length > 0) {
-      //   throw new BadRequestException('Некорректный запрос !');
-      // }
-      // throw new BadRequestException('OK !');
-
       const user = new User();
       user.name = body.name;
       user.login = body.login;
