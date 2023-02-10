@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Inject, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Auth } from '../auth/decorators/auth.decorator';
 import { ActivateDto, CreateUserDto } from './user.dto';
 import { UserService } from './user.service';
 
@@ -10,6 +11,7 @@ export class UserController {
   private readonly userService: UserService;
 
   @Get()
+  @Auth()
   @ApiOperation({ summary: 'Получение всех пользователей' })
   getAll() {
     return this.userService.getAll();
